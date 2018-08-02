@@ -1,4 +1,5 @@
 build:
+- go get github.com/pkg/errors
 - go build -o theapp
 env:
   APP_COMMAND: ./theapp
