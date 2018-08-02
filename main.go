@@ -21,14 +21,16 @@ type (
 	ApiBody struct {
 		Result int
 	}
-	// askRepository は、APIへのリクエストを
+	// askRepository は、APIへのリクエストを実行します。
 	askRepository interface {
 		Ask(int) (int, error)
 	}
+	// askRepositoryImpl は、askRepositoryの実装です。
 	askRepositoryImpl struct {
 		seed   string
 		result map[int]int
 	}
+	// solver は、チャレンジのロジック部を司ります。
 	solver struct {
 		repo  askRepository
 		cache map[int]int
@@ -151,7 +153,6 @@ func (r *askRepositoryImpl) askServer(n int) (int, error) {
 	q.Add("n", strconv.Itoa(n))
 	u := "http://challenge-server.code-check.io/api/recursive/ask?" + q.Encode()
 
-	println("calling", u)
 	resp, err := http.Get(u)
 	if err != nil {
 		return -1, errors.Wrapf(err, "cannot get the url: %s", u)
