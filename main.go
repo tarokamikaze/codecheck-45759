@@ -53,6 +53,7 @@ func main() {
 		return
 	}
 	fmt.Println(ans)
+	os.Exit(0)
 }
 
 // printErrorは、エラー結果をprintします
@@ -60,6 +61,7 @@ func printError(err error) {
 	msg := fmt.Sprintf("error! %s", err.Error())
 	fmt.Println(msg)
 	os.Stderr.WriteString(msg)
+	os.Exit(1)
 }
 
 // parseArgs は引数のパースとバリデーションを実施します。
