@@ -12,13 +12,16 @@ import (
 )
 
 type (
+	// args はコマンド引数を格納します。
 	args struct {
 		seed string
 		n    int
 	}
+	// ApiBody は、API結果を格納します。
 	ApiBody struct {
 		Result int
 	}
+	// askRepository は、APIへのリクエストを
 	askRepository interface {
 		Ask(int) (int, error)
 	}
@@ -27,7 +30,8 @@ type (
 		result map[int]int
 	}
 	solver struct {
-		repo askRepository
+		repo  askRepository
+		cache map[int]int
 	}
 )
 
@@ -48,12 +52,14 @@ func main() {
 	}
 	fmt.Println(ans)
 }
+
 // printErrorは、エラー結果をprintします
 func printError(err error) {
 	msg := fmt.Sprintf("error! %s", err.Error())
 	fmt.Println(msg)
 	os.Stderr.WriteString(msg)
 }
+
 // parseArgs は引数のパースとバリデーションを実施します。
 func parseArgs(a []string) (*args, error) {
 	// checking arguments length
@@ -78,7 +84,8 @@ func parseArgs(a []string) (*args, error) {
 // newSolver は、solverインスタンスを返します。
 func newSolver(seed string) *solver {
 	return &solver{
-		repo: newAskRepositoryImpl(seed),
+		repo:  newAskRepositoryImpl(seed),
+		cache: map[int]int{},
 	}
 }
 
@@ -100,10 +107,18 @@ func (s *solver) solve(n int) (int, error) {
 	// 偶数ならf(n - 1..4)の合計を返す
 	var ans int
 	for i := 1; i <= 4; i++ {
-		res, err := s.solve(n - i)
+		tgt := n - i
+		// 同じ数で再帰的に処理が走ってしまって重いので、solver側の偶数処理結果もキャッシュを活用する。
+		// api側はrepository内部キャッシュで済んでいるので、solverでは気にしないこととする。
+		if res, ok := s.cache[tgt]; ok {
+			ans += res
+			continue
+		}
+		res, err := s.solve(tgt)
 		if err != nil {
 			return 0, err
 		}
+		s.cache[tgt] = res
 		ans += res
 	}
 	return ans, nil
@@ -136,7 +151,7 @@ func (r *askRepositoryImpl) askServer(n int) (int, error) {
 	q.Add("n", strconv.Itoa(n))
 	u := "http://challenge-server.code-check.io/api/recursive/ask?" + q.Encode()
 
-	println("calling",u)
+	println("calling", u)
 	resp, err := http.Get(u)
 	if err != nil {
 		return -1, errors.Wrapf(err, "cannot get the url: %s", u)
