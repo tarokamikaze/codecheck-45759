@@ -1,0 +1,11 @@
+{
+  "name": "challenge-cache-api",
+  "version": "1.0.0",
+  "description": "codecheck challenge",
+  "author": "Givery",
+  "devDependencies": {
+    "codecheck": "^0.6.0",
+    "chai": "^3.5.0",
+    "request-promise": "^4.1.1"
+  }
+}

@@ -1,0 +1,3 @@
+env:
+  APP_COMMAND: ruby main.rb
+test: mocha --timeout 30000
